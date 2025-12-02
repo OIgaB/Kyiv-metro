@@ -53,7 +53,7 @@ export default function LinesPage() {
     setStation(e.target.value);
   };
 
-  const onSubmit = async () => {
+  const onStationCreate = async () => {
     const { data, error } = await supabase
       .from("stations")
       .insert([{ station_name: station }])
@@ -79,22 +79,26 @@ export default function LinesPage() {
 
   const handleLineSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     e.preventDefault();
+    console.info("setSelectedLineId: ", Number(e.target.value));
     setSelectedLineId(Number(e.target.value));
-    console.info(Number(e.target.value));
   };
 
-  const insertSupabaseTable = async (selectedStations: SelectedStation[]) => {
-    const payload = selectedStations.map(({ id }) => ({
-      line_id: selectedLineId,
-      station_id: id,
-    }));
+  const handleLineStationsConnect = async (
+    selectedStations: SelectedStation[]
+  ) => {
+    console.info("selectedStations: ", selectedStations); // [{id: 3, name: ...}, {…}, {…}]
+    console.info("selectedLineId,: ", selectedLineId); // 1
+
+    const stationIds = selectedStations.map((station) => station.id); 
+    console.info("stationIds: ", stationIds); //[3, 4]
 
     const { data, error } = await supabase
-      .from("lines_stations")
-      .insert(payload)
+      .from("stations")
+      .update({ line_id: selectedLineId })
+      .in("id", stationIds)
       .select();
 
-    console.info("insert: ", data);
+    console.info("inserted data: ", data);
 
     if (error) {
       console.error(
@@ -110,9 +114,7 @@ export default function LinesPage() {
     }
   };
 
-  const handleSelectedStationsSubmit = async (
-    e: React.FormEvent<HTMLFormElement>
-  ) => {
+  const onStationsSelect = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = e.currentTarget;
 
@@ -129,11 +131,11 @@ export default function LinesPage() {
       };
     });
 
-    // console.info("Selected stations:", selectedStations);
+    console.info("Selected stations:", selectedStations);
     setSelectedStations(selectedStations);
 
     if (selectedLineId) {
-      insertSupabaseTable(selectedStations);
+      handleLineStationsConnect(selectedStations);
     } else {
       alert("Select a line");
     }
@@ -141,7 +143,7 @@ export default function LinesPage() {
 
   return (
     <main style={{ padding: 20 }}>
-      <h2 className={'text-red-600'}>Metro Lines</h2>
+      <h2 className={"text-red-600"}>Metro Lines</h2>
 
       <ul style={{ marginTop: 20 }}>
         {lines.map((line) => (
@@ -169,7 +171,7 @@ export default function LinesPage() {
           onChange={handleStationInput}
         />
 
-        <button onClick={onSubmit}>{"Submit"}</button>
+        <button onClick={onStationCreate}>{"Submit"}</button>
       </div>
       <div style={{ marginTop: "20px" }}>
         <b>{"Connect your station to the line:"}</b>
@@ -196,7 +198,7 @@ export default function LinesPage() {
           </ul>
           <details>
             <summary>{"Connect your station to the line:"}</summary>
-            <form onSubmit={handleSelectedStationsSubmit}>
+            <form onSubmit={onStationsSelect}>
               <fieldset>
                 <ul>
                   {stations.map(({ id, station_name }) => (
