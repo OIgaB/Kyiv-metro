@@ -1,6 +1,10 @@
 import { useLoaderData } from "@remix-run/react";
 import { useState } from "react";
+
 import { supabase } from "../supabase-client";
+
+import { Button } from "../components";
+
 
 type Line = {
   id: number;
@@ -89,7 +93,7 @@ export default function LinesPage() {
     console.info("selectedStations: ", selectedStations); // [{id: 3, name: ...}, {…}, {…}]
     console.info("selectedLineId,: ", selectedLineId); // 1
 
-    const stationIds = selectedStations.map((station) => station.id); 
+    const stationIds = selectedStations.map((station) => station.id);
     console.info("stationIds: ", stationIds); //[3, 4]
 
     const { data, error } = await supabase
@@ -160,8 +164,13 @@ export default function LinesPage() {
           </li>
         ))}
       </ul>
-      <div>
-        <label htmlFor={"station"}>{"Create station"}</label>
+      <div className="flex flex-col md:flex-row items-start md:items-center gap-4 p-4 bg-white rounded-lg shadow-lg shadow-gray-300/50">
+        <label
+          htmlFor={"station"}
+          className="text-gray-700 font-medium mb-1 md:mb-0 md:mr-2"
+        >
+          {"Create station"}
+        </label>
         <input
           type={"text"}
           name={"station"}
@@ -169,9 +178,9 @@ export default function LinesPage() {
           placeholder={"Khreshchatyk"}
           value={station}
           onChange={handleStationInput}
+          className={"w-full md:w-64 px-3 py-2.5 border-2 border-neutral-800 rounded-lg focus:outline-none focus:ring-blue-400 focus:border-blue-400 transition-colors"}
         />
-
-        <button onClick={onStationCreate}>{"Submit"}</button>
+        <Button title={"Create"} onClick={onStationCreate} icon rotateIcon />
       </div>
       <div style={{ marginTop: "20px" }}>
         <b>{"Connect your station to the line:"}</b>
